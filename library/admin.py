@@ -2,17 +2,28 @@ from django.contrib import admin
 from library.models import *
 
 
+
 class BookInline(admin.StackedInline):
     model = Book
-    extra = 1
+    extra = 0
     classes = ['collapse']
 
 
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
     inlines = [BookInline]
-    list_display = ('pk', 'firstname', 'lastname', 'birth_date', 'is_deleted')
-    list_display_links = ('firstname', 'lastname')
+    list_display = ['pk','firstname', 'lastname', 'rate', 'is_deleted']
+    list_display_links = ['firstname', 'lastname']
+    actions = ['soft_delete', 'soft_backup']
+
+
+    @admin.action(description='Soft delete')
+    def soft_delete(self, request, queryset):
+        queryset.update(is_deleted=True)
+
+    @admin.action(description='Soft back')
+    def soft_backup(self, request, queryset):
+        queryset.update(is_deleted=False)
 
 
 @admin.register(Book)
